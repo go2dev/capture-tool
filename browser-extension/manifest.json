@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Capture Tool",
+  "version": "0.1.0",
+  "description": "Browser extension for Capture Tool — captures DOM metadata during recording sessions.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "Capture Tool"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

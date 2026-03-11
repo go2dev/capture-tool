@@ -3,13 +3,14 @@ use crate::events::EventState;
 use crate::session::models::SessionStatus;
 use crate::session::SessionState;
 use std::process::Command;
+use std::sync::Arc;
 use tauri::State;
 
 #[tauri::command]
 pub fn start_recording(
     session_id: String,
     capture_window: Option<String>,
-    recorder: State<RecorderState>,
+    recorder: State<Arc<RecorderState>>,
     session_state: State<SessionState>,
     event_state: State<EventState>,
 ) -> Result<(), String> {
@@ -108,7 +109,7 @@ pub fn start_recording(
 
 #[tauri::command]
 pub fn stop_recording(
-    recorder: State<RecorderState>,
+    recorder: State<Arc<RecorderState>>,
     session_state: State<SessionState>,
     event_state: State<EventState>,
 ) -> Result<String, String> {
@@ -180,7 +181,7 @@ pub fn stop_recording(
 }
 
 #[tauri::command]
-pub fn get_recording_status(recorder: State<RecorderState>) -> Result<serde_json::Value, String> {
+pub fn get_recording_status(recorder: State<Arc<RecorderState>>) -> Result<serde_json::Value, String> {
     let status = recorder.status.lock().map_err(|e| e.to_string())?;
     let session_id = recorder.current_session_id.lock().map_err(|e| e.to_string())?;
     let elapsed = recorder.start_time.lock().map_err(|e| e.to_string())?
