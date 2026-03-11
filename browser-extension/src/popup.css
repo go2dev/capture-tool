@@ -1,0 +1,128 @@
+/* -------------------------------------------------------
+   Dark-theme popup for Capture Tool browser extension
+   ------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  width: 280px;
+}
+
+.popup {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Status rows */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #16213e;
+}
+
+.label {
+  font-size: 12px;
+  color: #8e8ea0;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Badges */
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge.connected {
+  background: #0f3d2e;
+  color: #4ade80;
+}
+
+.badge.disconnected {
+  background: #3d1f1f;
+  color: #f87171;
+}
+
+.badge.active {
+  background: #3d2e0f;
+  color: #facc15;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.badge.inactive {
+  background: #2a2a3d;
+  color: #6b7280;
+}
+
+/* Button */
+.btn {
+  width: 100%;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.btn:hover {
+  background: #2563eb;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn.disconnect {
+  background: #dc2626;
+}
+
+.btn.disconnect:hover {
+  background: #b91c1c;
+}
+
+/* Pulse animation for recording indicator */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

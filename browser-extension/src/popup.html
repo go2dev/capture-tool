@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capture Tool</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup">
+    <h1 class="title">Capture Tool</h1>
+
+    <div class="status-row">
+      <span class="label">Connection</span>
+      <span id="connection-status" class="badge disconnected">Disconnected</span>
+    </div>
+
+    <div class="status-row">
+      <span class="label">Recording</span>
+      <span id="recording-status" class="badge inactive">Inactive</span>
+    </div>
+
+    <div class="status-row">
+      <span class="label">Events</span>
+      <span id="event-count" class="value">0</span>
+    </div>
+
+    <button id="toggle-btn" class="btn">Connect</button>
+  </div>
+
+  <script src="../dist/popup.js"></script>
+</body>
+</html>
