@@ -14,6 +14,8 @@ pub async fn process_session(
     let session_dir = get_sessions_dir().join(&session_id);
     let video_path = session_dir.join("recording.mp4");
     let audio_path = session_dir.join("audio.wav");
+    let merged_audio_path = session_dir.join("merged_audio.wav");
+    let voiceover_path = session_dir.join("voiceover.wav");
 
     // Update status to processing
     {
@@ -50,6 +52,29 @@ pub async fn process_session(
         }
     }
 
+    // Step 1b: Determine the best audio source for transcription.
+    // Priority: merged_audio.wav > auto-merge voiceover.wav > audio.wav
+    let transcription_audio = if merged_audio_path.exists() {
+        // User already merged voiceover -- use it
+        merged_audio_path.clone()
+    } else if voiceover_path.exists() && audio_path.exists() {
+        // Voiceover exists but hasn't been merged yet -- auto-merge now
+        log::info!("Auto-merging voiceover with original audio for session {}", session_id);
+        let merge_result = crate::voiceover::commands::merge_audio_internal(&session_dir);
+        if merge_result.is_ok() && merged_audio_path.exists() {
+            merged_audio_path.clone()
+        } else {
+            log::warn!("Auto-merge failed, falling back to original audio");
+            audio_path.clone()
+        }
+    } else if voiceover_path.exists() {
+        // Only voiceover exists (no original audio)
+        voiceover_path.clone()
+    } else {
+        // No voiceover -- use original audio
+        audio_path.clone()
+    };
+
     // Step 2: Run Python transcription worker
     let transcript_path = session_dir.join("transcript.json");
     let workers_dir = std::env::current_dir()
@@ -59,10 +84,10 @@ pub async fn process_session(
         .unwrap_or_else(|| std::path::PathBuf::from("."))
         .join("workers");
 
-    if audio_path.exists() {
+    if transcription_audio.exists() {
         let output = Command::new("python3")
             .arg(workers_dir.join("transcribe.py"))
-            .arg(&audio_path)
+            .arg(&transcription_audio)
             .arg(&transcript_path)
             .output()
             .map_err(|e| format!("Transcription worker failed: {}", e))?;

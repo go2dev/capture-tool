@@ -73,6 +73,8 @@ export default function SessionLibrary() {
           navigate("/record");
           break;
         case "recorded":
+          navigate("/voiceover");
+          break;
         case "processing":
           navigate("/processing");
           break;

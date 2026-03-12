@@ -41,3 +41,4 @@ workers/.venv/
 
 # Sessions data (local)
 sessions/
+.claude/worktrees/

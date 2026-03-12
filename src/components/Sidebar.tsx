@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Library,
   Circle,
+  Mic,
   Cog,
   FileText,
   Download,
@@ -11,9 +12,12 @@ import {
 import { useSessionStore } from "../stores/sessionStore";
 import { useRecordingStore } from "../stores/recordingStore";
 
-const navItems = [
+const baseNavItems = [
   { to: "/", icon: Library, label: "Sessions" },
   { to: "/record", icon: Circle, label: "Record" },
+];
+
+const postNavItems = [
   { to: "/processing", icon: Cog, label: "Processing" },
   { to: "/review", icon: FileText, label: "Review" },
   { to: "/export", icon: Download, label: "Export" },
@@ -24,6 +28,17 @@ export default function Sidebar() {
   const location = useLocation();
   const currentSession = useSessionStore((s) => s.currentSession);
   const recStatus = useRecordingStore((s) => s.status);
+
+  // Show voiceover nav item when session is in "recorded" state
+  const showVoiceover = currentSession?.status === "recorded";
+
+  const navItems = [
+    ...baseNavItems,
+    ...(showVoiceover
+      ? [{ to: "/voiceover", icon: Mic, label: "Voiceover" }]
+      : []),
+    ...postNavItems,
+  ];
 
   return (
     <aside className="sidebar no-select">

@@ -1680,6 +1680,41 @@ body {
 }
 
 /* ============================================================
+   Recording Panel - Post-record options
+   ============================================================ */
+
+.recording-post-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  width: 100%;
+}
+
+.recording-post-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recording-post-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.recording-post-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ============================================================
    Settings Page
    ============================================================ */
 
@@ -1729,6 +1764,80 @@ body {
 }
 
 .settings-dir-row {
+/* ============================================================
+   Voiceover Panel
+   ============================================================ */
+
+.voiceover-panel {
+  padding: 24px 32px;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.voiceover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.voiceover-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.voiceover-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  max-width: 520px;
+}
+
+/* Video container */
+.voiceover-video-container {
+  position: relative;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+}
+
+.voiceover-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #000;
+}
+
+.voiceover-video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+/* Recording overlay */
+.voiceover-recording-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+  pointer-events: none;
+}
+
+.voiceover-recording-indicator {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1779,4 +1888,188 @@ body {
   font-size: 12px;
   color: var(--red-400);
   max-width: 400px;
+}
+
+.voiceover-recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red-500);
+  animation: pulse-dot 1.5s ease infinite;
+  flex-shrink: 0;
+}
+
+.voiceover-recording-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+}
+
+.voiceover-recording-time {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: auto;
+}
+
+/* Markers */
+.voiceover-markers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voiceover-markers-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.voiceover-markers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.voiceover-marker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+.voiceover-marker-chip:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.voiceover-marker-time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.voiceover-marker-label {
+  color: var(--yellow-400);
+  font-weight: 500;
+}
+
+/* Controls */
+.voiceover-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.voiceover-controls-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.voiceover-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+  max-width: 400px;
+}
+
+.voiceover-stop-btn {
+  border-color: var(--red-500) !important;
+  color: var(--red-400) !important;
+}
+
+.voiceover-stop-btn:hover {
+  background: var(--red-900) !important;
+}
+
+/* Recorded info card */
+.voiceover-recorded-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.voiceover-recorded-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  width: 100%;
+}
+
+.voiceover-recorded-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voiceover-recorded-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.voiceover-recorded-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.voiceover-recorded-duration {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.voiceover-recorded-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Merging state */
+.voiceover-merging-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Done state */
+.voiceover-done-message {
+  font-size: 14px;
+  color: var(--green-400);
+  font-weight: 500;
+  text-align: center;
 }

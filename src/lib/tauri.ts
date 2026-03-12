@@ -105,6 +105,40 @@ export interface RecordingStatusResponse {
   elapsed_seconds: number | null;
 }
 
+// ---- Settings types ----
+
+export type LlmProvider = "anthropic" | "openai" | "ollama" | "none";
+
+export interface Settings {
+  llm_provider: LlmProvider;
+  llm_model: string;
+  anthropic_api_key: string | null;
+  openai_api_key: string | null;
+  ollama_url: string;
+  whisper_model: string;
+  output_default_dir: string | null;
+  recording_framerate: number;
+  recording_quality: string;
+  marker_hotkey: string;
+  auto_redact: boolean;
+}
+
+// ---- CDP types ----
+
+export interface CdpTabSummary {
+  id: string;
+  title: string;
+  url: string;
+}
+
+export interface CdpStatus {
+  available: boolean;
+  browser: string | null;
+  connected_tab: CdpTabSummary | null;
+  event_count: number;
+  capturing: boolean;
+}
+
 // ---- Tauri command wrappers ----
 
 export async function createSession(
@@ -182,24 +216,6 @@ export async function generateMdx(sessionId: string): Promise<string> {
   return invoke<string>("generate_mdx", { sessionId });
 }
 
-// ---- Settings types ----
-
-export type LlmProvider = "anthropic" | "openai" | "ollama" | "none";
-
-export interface Settings {
-  llm_provider: LlmProvider;
-  llm_model: string;
-  anthropic_api_key: string | null;
-  openai_api_key: string | null;
-  ollama_url: string;
-  whisper_model: string;
-  output_default_dir: string | null;
-  recording_framerate: number;
-  recording_quality: string;
-  marker_hotkey: string;
-  auto_redact: boolean;
-}
-
 // ---- Settings command wrappers ----
 
 export async function getSettings(): Promise<Settings> {
@@ -216,4 +232,80 @@ export async function getSetting(key: string): Promise<unknown> {
 
 export async function setSetting(key: string, value: unknown): Promise<void> {
   return invoke<void>("set_setting", { key, value });
+}
+
+// ---- CDP command wrappers ----
+
+export async function cdpCheckStatus(): Promise<CdpStatus> {
+  return invoke<CdpStatus>("cdp_check_status");
+}
+
+export async function cdpLaunchBrowser(url?: string): Promise<void> {
+  return invoke<void>("cdp_launch_browser", { url: url ?? null });
+}
+
+export async function cdpConnectTab(tabId?: string): Promise<CdpTabSummary> {
+  return invoke<CdpTabSummary>("cdp_connect_tab", { tabId: tabId ?? null });
+}
+
+export async function cdpListTabs(): Promise<CdpTabSummary[]> {
+  return invoke<CdpTabSummary[]>("cdp_list_tabs");
+}
+
+export async function cdpStartCapture(sessionId: string): Promise<void> {
+  return invoke<void>("cdp_start_capture", { sessionId });
+}
+
+export async function cdpStopCapture(): Promise<number> {
+  return invoke<number>("cdp_stop_capture");
+}
+
+export async function cdpTakeScreenshot(
+  sessionId: string,
+  stepIndex: number,
+  selector?: string
+): Promise<string> {
+  return invoke<string>("cdp_take_screenshot", {
+    sessionId,
+    stepIndex,
+    selector: selector ?? null,
+  });
+}
+
+// ---- Voiceover types ----
+
+export interface VoiceoverStatus {
+  has_voiceover: boolean;
+  has_merged: boolean;
+  voiceover_duration_secs: number | null;
+  is_recording: boolean;
+  recording_elapsed_secs: number | null;
+}
+
+// ---- Voiceover command wrappers ----
+
+export async function startVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("start_voiceover", { sessionId });
+}
+
+export async function stopVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("stop_voiceover", { sessionId });
+}
+
+export async function mergeAudio(sessionId: string): Promise<void> {
+  return invoke<void>("merge_audio", { sessionId });
+}
+
+export async function getVoiceoverStatus(
+  sessionId: string
+): Promise<VoiceoverStatus> {
+  return invoke<VoiceoverStatus>("get_voiceover_status", { sessionId });
+}
+
+export async function deleteVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("delete_voiceover", { sessionId });
+}
+
+export async function getVideoPath(sessionId: string): Promise<string> {
+  return invoke<string>("get_video_path", { sessionId });
 }
