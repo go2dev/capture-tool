@@ -181,3 +181,41 @@ export async function extractFrames(
 export async function generateMdx(sessionId: string): Promise<string> {
   return invoke<string>("generate_mdx", { sessionId });
 }
+
+// ---- Voiceover types ----
+
+export interface VoiceoverStatus {
+  has_voiceover: boolean;
+  has_merged: boolean;
+  voiceover_duration_secs: number | null;
+  is_recording: boolean;
+  recording_elapsed_secs: number | null;
+}
+
+// ---- Voiceover command wrappers ----
+
+export async function startVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("start_voiceover", { sessionId });
+}
+
+export async function stopVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("stop_voiceover", { sessionId });
+}
+
+export async function mergeAudio(sessionId: string): Promise<void> {
+  return invoke<void>("merge_audio", { sessionId });
+}
+
+export async function getVoiceoverStatus(
+  sessionId: string
+): Promise<VoiceoverStatus> {
+  return invoke<VoiceoverStatus>("get_voiceover_status", { sessionId });
+}
+
+export async function deleteVoiceover(sessionId: string): Promise<void> {
+  return invoke<void>("delete_voiceover", { sessionId });
+}
+
+export async function getVideoPath(sessionId: string): Promise<string> {
+  return invoke<string>("get_video_path", { sessionId });
+}

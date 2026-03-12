@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flag, AlertCircle } from "lucide-react";
+import { Flag, AlertCircle, Mic, ArrowRight } from "lucide-react";
 import { useSessionStore } from "../stores/sessionStore";
 import { useRecordingStore } from "../stores/recordingStore";
 import type { SourceMode } from "../lib/tauri";
@@ -37,18 +37,20 @@ export default function RecordingPanel() {
 
   const isRecording = status === "recording";
   const isStopping = status === "stopping";
+  const [showPostRecordOptions, setShowPostRecordOptions] = useState(false);
 
   const handleToggleRecording = useCallback(async () => {
     if (isRecording) {
       try {
         await stopRecording();
         await refreshCurrentSession();
-        navigate("/processing");
+        setShowPostRecordOptions(true);
       } catch {
         // Error handled in store
       }
     } else {
       if (!currentSession) return;
+      setShowPostRecordOptions(false);
       try {
         await startRecording(currentSession.session_id);
       } catch {
@@ -61,7 +63,6 @@ export default function RecordingPanel() {
     startRecording,
     stopRecording,
     refreshCurrentSession,
-    navigate,
   ]);
 
   const handleAddMarker = useCallback(async () => {
@@ -154,12 +155,40 @@ export default function RecordingPanel() {
         </div>
       </div>
 
+      {/* Post-recording options */}
+      {showPostRecordOptions && !isRecording && (
+        <div className="recording-post-options">
+          <div className="recording-post-title">Recording Complete</div>
+          <div className="recording-post-desc">
+            Would you like to add a voiceover narration before processing?
+          </div>
+          <div className="recording-post-buttons">
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => navigate("/voiceover")}
+            >
+              <Mic />
+              Add Voiceover
+            </button>
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => navigate("/processing")}
+            >
+              Skip to Processing
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hints */}
-      <div className="recording-hint">
-        {isRecording
-          ? "Recording in progress. Use markers to indicate important steps. Press Stop when done."
-          : "Press the record button to begin capturing. Your screen and audio will be recorded."}
-      </div>
+      {!showPostRecordOptions && (
+        <div className="recording-hint">
+          {isRecording
+            ? "Recording in progress. Use markers to indicate important steps. Press Stop when done."
+            : "Press the record button to begin capturing. Your screen and audio will be recorded."}
+        </div>
+      )}
     </div>
   );
 }
