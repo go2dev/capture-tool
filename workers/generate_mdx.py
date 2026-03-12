@@ -3,10 +3,19 @@
 
 Reads session data (steps.json, transcript.json, session.json) and
 produces Docusaurus-compatible MDX output.
+
+Supports multiple LLM providers:
+  --provider anthropic|openai|ollama|none
+  --model    <model name>
+  --api-key  <api key>  (for anthropic/openai)
+  --ollama-url <url>    (for ollama, default http://localhost:11434)
 """
+import argparse
 import json
 import os
 import sys
+import urllib.request
+import urllib.error
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
@@ -18,17 +27,12 @@ def load_json(path: Path):
     return None
 
 
-def rewrite_step_with_llm(step: dict, transcript_excerpt: str) -> dict:
-    """Use Claude to rewrite a step into documentation prose.
+# ---------------------------------------------------------------------------
+# LLM rewriting backends
+# ---------------------------------------------------------------------------
 
-    Falls back to rule-based rewriting if API unavailable.
-    """
-    try:
-        import anthropic
-
-        client = anthropic.Anthropic()
-
-        prompt = f"""You are writing procedural documentation for an internal software tool.
+def _build_prompt(step: dict, transcript_excerpt: str) -> str:
+    return f"""You are writing procedural documentation for an internal software tool.
 Rewrite this step as a clear, concise instruction.
 
 Step context:
@@ -52,23 +56,103 @@ Return JSON with these fields:
 - expected_outcome: what the user should see after this step (or null)
 - needs_gif: boolean, true only if motion is needed to understand the action"""
 
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}],
-        )
 
-        response_text = message.content[0].text
-        # Try to parse JSON from response
-        if "```json" in response_text:
-            json_str = response_text.split("```json")[1].split("```")[0]
-        elif "```" in response_text:
-            json_str = response_text.split("```")[1].split("```")[0]
+def _parse_llm_json(response_text: str) -> dict:
+    """Extract JSON from an LLM response that may include markdown fences."""
+    if "```json" in response_text:
+        json_str = response_text.split("```json")[1].split("```")[0]
+    elif "```" in response_text:
+        json_str = response_text.split("```")[1].split("```")[0]
+    else:
+        json_str = response_text
+    return json.loads(json_str.strip())
+
+
+def rewrite_with_anthropic(step: dict, transcript_excerpt: str, model: str, api_key: str | None) -> dict:
+    """Use Anthropic Claude to rewrite a step."""
+    import anthropic
+
+    kwargs = {}
+    if api_key:
+        kwargs["api_key"] = api_key
+    client = anthropic.Anthropic(**kwargs)
+
+    prompt = _build_prompt(step, transcript_excerpt)
+    message = client.messages.create(
+        model=model,
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return _parse_llm_json(message.content[0].text)
+
+
+def rewrite_with_openai(step: dict, transcript_excerpt: str, model: str, api_key: str | None) -> dict:
+    """Use OpenAI to rewrite a step."""
+    import openai
+
+    kwargs = {}
+    if api_key:
+        kwargs["api_key"] = api_key
+    client = openai.OpenAI(**kwargs)
+
+    prompt = _build_prompt(step, transcript_excerpt)
+    response = client.chat.completions.create(
+        model=model,
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return _parse_llm_json(response.choices[0].message.content)
+
+
+def rewrite_with_ollama(step: dict, transcript_excerpt: str, model: str, ollama_url: str) -> dict:
+    """Use Ollama (local) to rewrite a step via HTTP API."""
+    prompt = _build_prompt(step, transcript_excerpt)
+
+    url = f"{ollama_url.rstrip('/')}/api/generate"
+    payload = json.dumps({
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {"num_predict": 500},
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+
+    return _parse_llm_json(body.get("response", "{}"))
+
+
+def rewrite_step_with_llm(
+    step: dict,
+    transcript_excerpt: str,
+    provider: str,
+    model: str,
+    api_key: str | None,
+    ollama_url: str,
+) -> dict:
+    """Dispatch to the configured LLM provider.
+
+    Falls back to rule-based rewriting on any error or when provider is "none".
+    """
+    if provider == "none":
+        return rule_based_rewrite(step, transcript_excerpt)
+
+    try:
+        if provider == "anthropic":
+            return rewrite_with_anthropic(step, transcript_excerpt, model, api_key)
+        elif provider == "openai":
+            return rewrite_with_openai(step, transcript_excerpt, model, api_key)
+        elif provider == "ollama":
+            return rewrite_with_ollama(step, transcript_excerpt, model, ollama_url)
         else:
-            json_str = response_text
-
-        return json.loads(json_str.strip())
-
+            print(f"Unknown provider '{provider}', using rule-based fallback", file=sys.stderr)
+            return rule_based_rewrite(step, transcript_excerpt)
     except Exception as e:
         print(f"LLM rewrite unavailable ({e}), using rule-based fallback", file=sys.stderr)
         return rule_based_rewrite(step, transcript_excerpt)
@@ -125,7 +209,13 @@ def generate_frontmatter(session: dict, steps: list) -> str:
     """)
 
 
-def generate_mdx(session_dir: str):
+def generate_mdx(
+    session_dir: str,
+    provider: str = "anthropic",
+    model: str = "claude-sonnet-4-20250514",
+    api_key: str | None = None,
+    ollama_url: str = "http://localhost:11434",
+):
     """Main MDX generation."""
     session_path = Path(session_dir)
 
@@ -144,7 +234,9 @@ def generate_mdx(session_dir: str):
     rewritten_steps = []
     for step in steps:
         excerpt = step.get("transcript_excerpt", "")
-        rewritten = rewrite_step_with_llm(step, excerpt)
+        rewritten = rewrite_step_with_llm(
+            step, excerpt, provider, model, api_key, ollama_url
+        )
         rewritten["step_id"] = step.get("step_id", "")
         rewritten["t_start_ms"] = step.get("t_start_ms", 0)
         rewritten["t_end_ms"] = step.get("t_end_ms", 0)
@@ -234,8 +326,27 @@ def generate_mdx(session_dir: str):
     print(f"Steps: {len(rewritten_steps)}", file=sys.stderr)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generate MDX documentation from session data")
+    parser.add_argument("session_dir", help="Path to the session directory")
+    parser.add_argument("--provider", default="anthropic",
+                        choices=["anthropic", "openai", "ollama", "none"],
+                        help="LLM provider (default: anthropic)")
+    parser.add_argument("--model", default="claude-sonnet-4-20250514",
+                        help="Model name (default: claude-sonnet-4-20250514)")
+    parser.add_argument("--api-key", default=None,
+                        help="API key for the LLM provider")
+    parser.add_argument("--ollama-url", default="http://localhost:11434",
+                        help="Ollama server URL (default: http://localhost:11434)")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: generate_mdx.py <session_dir>", file=sys.stderr)
-        sys.exit(1)
-    generate_mdx(sys.argv[1])
+    args = parse_args()
+    generate_mdx(
+        session_dir=args.session_dir,
+        provider=args.provider,
+        model=args.model,
+        api_key=args.api_key,
+        ollama_url=args.ollama_url,
+    )

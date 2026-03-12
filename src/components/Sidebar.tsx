@@ -6,6 +6,7 @@ import {
   FileText,
   Download,
   Video,
+  Settings,
 } from "lucide-react";
 import { useSessionStore } from "../stores/sessionStore";
 import { useRecordingStore } from "../stores/recordingStore";
@@ -16,6 +17,7 @@ const navItems = [
   { to: "/processing", icon: Cog, label: "Processing" },
   { to: "/review", icon: FileText, label: "Review" },
   { to: "/export", icon: Download, label: "Export" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export default function Sidebar() {

@@ -7,6 +7,7 @@ import RecordingPanel from "./components/RecordingPanel";
 import ProcessingView from "./components/ProcessingView";
 import ReviewEditor from "./components/ReviewEditor";
 import ExportView from "./components/ExportView";
+import Settings from "./components/Settings";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           <Route path="/processing" element={<ProcessingView />} />
           <Route path="/review" element={<ReviewEditor />} />
           <Route path="/export" element={<ExportView />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -2,6 +2,7 @@ use super::{ProcessingProgress, ProcessingStage};
 use crate::session::db::get_sessions_dir;
 use crate::session::models::SessionStatus;
 use crate::session::SessionState;
+use crate::settings::SettingsState;
 use std::process::Command;
 use tauri::State;
 
@@ -162,7 +163,10 @@ pub fn extract_frames(
 }
 
 #[tauri::command]
-pub fn generate_mdx(session_id: String) -> Result<String, String> {
+pub fn generate_mdx(
+    session_id: String,
+    settings_state: State<'_, SettingsState>,
+) -> Result<String, String> {
     let session_dir = get_sessions_dir().join(&session_id);
     let workers_dir = std::env::current_dir()
         .map_err(|e| e.to_string())?
@@ -171,9 +175,51 @@ pub fn generate_mdx(session_id: String) -> Result<String, String> {
         .unwrap_or_else(|| std::path::PathBuf::from("."))
         .join("workers");
 
-    let output = Command::new("python3")
-        .arg(workers_dir.join("generate_mdx.py"))
+    // Read LLM settings
+    let settings = settings_state
+        .inner
+        .lock()
+        .map_err(|e| e.to_string())?
+        .clone();
+
+    let provider_str = match &settings.llm_provider {
+        crate::settings::LlmProvider::Anthropic => "anthropic",
+        crate::settings::LlmProvider::Openai => "openai",
+        crate::settings::LlmProvider::Ollama => "ollama",
+        crate::settings::LlmProvider::None => "none",
+    };
+
+    let mut cmd = Command::new("python3");
+    cmd.arg(workers_dir.join("generate_mdx.py"))
         .arg(&session_dir)
+        .arg("--provider")
+        .arg(provider_str)
+        .arg("--model")
+        .arg(&settings.llm_model);
+
+    // Pass the appropriate API key or URL
+    match &settings.llm_provider {
+        crate::settings::LlmProvider::Anthropic => {
+            if let Some(ref key) = settings.anthropic_api_key {
+                if !key.is_empty() {
+                    cmd.arg("--api-key").arg(key);
+                }
+            }
+        }
+        crate::settings::LlmProvider::Openai => {
+            if let Some(ref key) = settings.openai_api_key {
+                if !key.is_empty() {
+                    cmd.arg("--api-key").arg(key);
+                }
+            }
+        }
+        crate::settings::LlmProvider::Ollama => {
+            cmd.arg("--ollama-url").arg(&settings.ollama_url);
+        }
+        crate::settings::LlmProvider::None => {}
+    }
+
+    let output = cmd
         .output()
         .map_err(|e| format!("MDX generation failed: {}", e))?;
 

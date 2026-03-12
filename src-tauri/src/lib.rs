@@ -2,6 +2,7 @@ mod recorder;
 mod events;
 mod session;
 mod processing;
+mod settings;
 mod websocket;
 
 use session::db;
@@ -32,6 +33,7 @@ pub fn run() {
         .manage(session::SessionState::new(db_conn))
         .manage(recorder_state)
         .manage(event_state)
+        .manage(settings::SettingsState::new())
         .invoke_handler(tauri::generate_handler![
             // Session commands
             session::commands::create_session,
@@ -51,6 +53,11 @@ pub fn run() {
             processing::commands::get_processing_status,
             processing::commands::extract_frames,
             processing::commands::generate_mdx,
+            // Settings commands
+            settings::get_settings,
+            settings::save_settings,
+            settings::get_setting,
+            settings::set_setting,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

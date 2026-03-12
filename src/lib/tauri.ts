@@ -181,3 +181,39 @@ export async function extractFrames(
 export async function generateMdx(sessionId: string): Promise<string> {
   return invoke<string>("generate_mdx", { sessionId });
 }
+
+// ---- Settings types ----
+
+export type LlmProvider = "anthropic" | "openai" | "ollama" | "none";
+
+export interface Settings {
+  llm_provider: LlmProvider;
+  llm_model: string;
+  anthropic_api_key: string | null;
+  openai_api_key: string | null;
+  ollama_url: string;
+  whisper_model: string;
+  output_default_dir: string | null;
+  recording_framerate: number;
+  recording_quality: string;
+  marker_hotkey: string;
+  auto_redact: boolean;
+}
+
+// ---- Settings command wrappers ----
+
+export async function getSettings(): Promise<Settings> {
+  return invoke<Settings>("get_settings");
+}
+
+export async function saveSettings(settings: Settings): Promise<void> {
+  return invoke<void>("save_settings", { settings });
+}
+
+export async function getSetting(key: string): Promise<unknown> {
+  return invoke<unknown>("get_setting", { key });
+}
+
+export async function setSetting(key: string, value: unknown): Promise<void> {
+  return invoke<void>("set_setting", { key, value });
+}
