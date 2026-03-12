@@ -159,9 +159,24 @@ pub fn extract_frames(
 
     let mut frame_paths = Vec::new();
 
-    for (i, ts) in timestamps_ms.iter().enumerate() {
-        let seconds = *ts as f64 / 1000.0;
-        let output_path = assets_dir.join(format!("step-{:02}.png", i + 1));
+    for (i, _ts) in timestamps_ms.iter().enumerate() {
+        let step_num = i + 1;
+
+        // Prefer CDP screenshots over FFmpeg-extracted frames.
+        // CDP screenshots are saved as step-XX-cdp.png by cdp_take_screenshot.
+        let cdp_path = assets_dir.join(format!("step-{:02}-cdp.png", step_num));
+        if cdp_path.exists() {
+            log::info!(
+                "Using CDP screenshot for step {} (cleaner than video frame)",
+                step_num
+            );
+            frame_paths.push(cdp_path.to_string_lossy().to_string());
+            continue;
+        }
+
+        // Fall back to FFmpeg frame extraction from the video recording
+        let seconds = *_ts as f64 / 1000.0;
+        let output_path = assets_dir.join(format!("step-{:02}.png", step_num));
 
         let output = Command::new("ffmpeg")
             .args([

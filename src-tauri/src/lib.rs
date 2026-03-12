@@ -1,3 +1,4 @@
+mod cdp;
 mod recorder;
 mod events;
 mod session;
@@ -17,6 +18,7 @@ pub fn run() {
 
     let event_state = events::EventState::default();
     let recorder_state = Arc::new(recorder::RecorderState::default());
+    let cdp_state = Arc::new(cdp::CdpState::default());
     let voiceover_state = voiceover::VoiceoverState::default();
 
     // Start the WebSocket server for the browser extension.
@@ -35,6 +37,7 @@ pub fn run() {
         .manage(session::SessionState::new(db_conn))
         .manage(recorder_state)
         .manage(event_state)
+        .manage(cdp_state)
         .manage(settings::SettingsState::new())
         .manage(voiceover_state)
         .invoke_handler(tauri::generate_handler![
@@ -61,6 +64,14 @@ pub fn run() {
             settings::save_settings,
             settings::get_setting,
             settings::set_setting,
+            // CDP commands
+            cdp::cdp_check_status,
+            cdp::cdp_launch_browser,
+            cdp::cdp_connect_tab,
+            cdp::cdp_list_tabs,
+            cdp::cdp_start_capture,
+            cdp::cdp_stop_capture,
+            cdp::cdp_take_screenshot,
             // Voiceover commands
             voiceover::commands::start_voiceover,
             voiceover::commands::stop_voiceover,

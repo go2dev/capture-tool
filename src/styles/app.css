@@ -2073,3 +2073,240 @@ body {
   font-weight: 500;
   text-align: center;
 }
+
+/* ============================================================
+   Browser Capture (CDP) Panel
+   ============================================================ */
+
+.browser-capture {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+}
+
+.browser-capture-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.browser-capture-title {
+  flex: 1;
+}
+
+.browser-capture-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.browser-capture-status-dot.available {
+  background: var(--green-400);
+  box-shadow: 0 0 4px var(--green-400);
+}
+
+.browser-capture-status-dot.unavailable {
+  background: var(--gray-500);
+}
+
+.browser-capture-error {
+  font-size: 12px;
+  color: var(--red-400);
+  padding: 6px 10px;
+  background: var(--red-900);
+  border-radius: var(--radius-sm);
+}
+
+.browser-capture-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.browser-capture-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.browser-capture-indicator .indicator-on {
+  color: var(--green-400);
+}
+
+.browser-capture-indicator .indicator-off {
+  color: var(--gray-500);
+}
+
+.browser-capture-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.browser-capture-url-row {
+  display: flex;
+  gap: 6px;
+}
+
+.browser-capture-url-input {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.browser-capture-url-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.browser-capture-btn {
+  width: 100%;
+}
+
+.browser-capture-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.browser-capture-tab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.browser-capture-tab-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  font-family: var(--font-sans);
+}
+
+.browser-capture-tab-item:hover {
+  border-color: var(--accent-500);
+  background: rgba(59, 111, 255, 0.06);
+}
+
+.browser-capture-tab-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-capture-tab-url {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-capture-connected-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-md);
+}
+
+.browser-capture-connected-tab > svg {
+  color: var(--green-400);
+  flex-shrink: 0;
+}
+
+.browser-capture-tab-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.browser-capture-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.browser-capture-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.browser-capture-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.browser-capture-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.browser-capture-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.browser-capture-stat-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.browser-capture-stat-badge.capturing {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green-400);
+  animation: pulse-dot 2s ease infinite;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
