@@ -229,12 +229,23 @@ fn find_chrome_path() -> Option<String> {
 }
 
 /// Launch Chrome/Edge with `--remote-debugging-port=9222`.
+/// Uses a separate user-data-dir so it starts as an independent instance
+/// even when Chrome is already running (without CDP).
 fn launch_chrome_with_cdp(url: Option<String>) -> Result<Child, String> {
     let chrome_path =
         find_chrome_path().ok_or_else(|| "Chrome/Edge not found on this system".to_string())?;
 
+    // Use a dedicated profile directory so Chrome launches as a separate
+    // instance instead of joining the existing one (which has no CDP).
+    let cdp_profile = dirs::data_dir()
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join("capture-tool")
+        .join("cdp-chrome-profile");
+    std::fs::create_dir_all(&cdp_profile).ok();
+
     let mut args = vec![
         format!("--remote-debugging-port={}", CDP_PORT),
+        format!("--user-data-dir={}", cdp_profile.to_string_lossy()),
         "--no-first-run".to_string(),
         "--no-default-browser-check".to_string(),
     ];
